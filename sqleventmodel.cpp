@@ -55,7 +55,6 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <string>
-using namespace std;
 
 SqlEventModel::SqlEventModel()
 {
