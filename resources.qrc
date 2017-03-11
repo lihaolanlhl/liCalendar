@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/eventindicator.png</file>
+        <file>images/ic_add_white_24px.svg</file>
+    </qresource>
+</RCC>
