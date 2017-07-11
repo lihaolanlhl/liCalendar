@@ -66,6 +66,7 @@ public:
 
     Q_INVOKABLE QList<QObject*> eventsForDate(const QDate &date);
     Q_INVOKABLE void addEvents(const QString &event,const QString &startdate,const QString &startime,const QString &stopdate,const QString &stoptime);
+    Q_INVOKABLE void dropEvents(const QString &event,const QString &startdate,const QString &startime,const QString &stopdate,const QString &stoptime);
 
 private:
     static void createConnection();

@@ -24,6 +24,14 @@ void SqlEventModel::addEvents(const QString &event,const QString &startdate,cons
     query.exec(addstr);
 }
 
+void SqlEventModel::dropEvents(const QString &event,const QString &startdate,const QString &startime,const QString &stopdate,const QString &stoptime)
+{
+    QSqlQuery query;
+    // We store the time as seconds because it's easier to query.
+    const QString addstr = QString::fromLatin1("insert into Event values('%1', '%2', %3, '%4', %5)").arg(event).arg(startdate).arg(startime).arg(stopdate).arg(stoptime);
+    query.exec(addstr);
+}
+
 QList<QObject*> SqlEventModel::eventsForDate(const QDate &date)
 {
     const QString queryStr = QString::fromLatin1("SELECT * FROM Event WHERE '%1' >= startDate AND '%1' <= endDate").arg(date.toString("yyyy-MM-dd"));

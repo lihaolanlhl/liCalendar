@@ -9,8 +9,6 @@ SOURCES += main.cpp \
 RESOURCES += qml.qrc \
     resources.qrc
 
-!qtConfig(sql-sqlite): QTPLUGIN += qsqlite
-
 # Additional import path used to resolve QML modules in Qt Creator's code model
 QML_IMPORT_PATH =
 

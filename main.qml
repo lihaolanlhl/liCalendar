@@ -163,6 +163,23 @@ ApplicationWindow {
                 border.color: Qt.platform.os === "osx" ? "#3778d0" : systemPalette.highlight
                 border.width: 2
 
+                Component {
+                    id: highlight
+                    Rectangle {
+                        color: "transparent"
+                        border.color: Qt.platform.os === "osx" ? "#3778d0" : systemPalette.highlight
+                        border.width: 2
+                        radius: 0
+                        y: eventsListView.currentItem.y
+                        Behavior on y {
+                            SpringAnimation {
+                                spring: 3
+                                damping: 0.2
+                            }
+                        }
+                    }
+                }
+
                 ListView {
                     id: eventsListView
                     spacing: 4
@@ -171,49 +188,62 @@ ApplicationWindow {
                     anchors.fill: parent
                     anchors.margins: 10
                     model: eventModel.eventsForDate(calendar.selectedDate)
+                    move: Transition {
+                        NumberAnimation { properties: "x,y"; duration: 500 }
+                    }
+                    highlight: highlight
+                    highlightFollowsCurrentItem: true
 
-                    delegate: Rectangle {
-                        width: eventsListView.width
-                        height: eventItemColumn.height
-                        anchors.horizontalCenter: parent.horizontalCenter
+                    delegate: Component {
+                            Item {
+                                width: eventsListView.width
+                                height: eventItemColumn.height
+                                anchors.horizontalCenter: parent.horizontalCenter
 
-                        Image {
-                            anchors.top: parent.top
-                            anchors.topMargin: 4
-                            width: 12
-                            height: width
-                            source: "qrc:/images/eventindicator.png"
-                        }
+                                Image {
+                                    anchors.top: parent.top
+                                    anchors.topMargin: 3
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: 3
+                                    width: 12
+                                    height: width
+                                    source: "qrc:/images/eventindicator.png"
+                                }
 
-                        Rectangle {
-                            width: parent.width
-                            height: 2
-                            color: Qt.platform.os === "osx" ? "#3778d0" : systemPalette.highlight
-                        }
+                                Rectangle {
+                                    width: parent.width
+                                    height: 2
+                                    color: Qt.platform.os === "osx" ? "#3778d0" : systemPalette.highlight
+                                }
 
-                        Column {
-                            id: eventItemColumn
-                            anchors.left: parent.left
-                            anchors.leftMargin: 20
-                            anchors.right: parent.right
-                            anchors.top: parent.top
-                            anchors.topMargin: 6
-                            height: timeLabel.height + nameLabel.height + 8
+                                Column {
+                                    id: eventItemColumn
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: 20
+                                    anchors.right: parent.right
+                                    anchors.top: parent.top
+                                    anchors.topMargin: 6
+                                    height: timeLabel.height + nameLabel.height + 8
 
-                            Label {
-                                id: nameLabel
-                                width: parent.width
-                                wrapMode: Text.Wrap
-                                text: modelData.name
+                                    Label {
+                                        id: nameLabel
+                                        width: parent.width
+                                        wrapMode: Text.Wrap
+                                        text: modelData.name
+                                    }
+                                    Label {
+                                        id: timeLabel
+                                        width: parent.width
+                                        wrapMode: Text.Wrap
+                                        text: modelData.startDate.toLocaleTimeString(calendar.locale, Locale.ShortFormat)
+                                        color: "#aaa"
+                                    }
+                                }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    onClicked: eventsListView.currentIndex = index
+                                }
                             }
-                            Label {
-                                id: timeLabel
-                                width: parent.width
-                                wrapMode: Text.Wrap
-                                text: modelData.startDate.toLocaleTimeString(calendar.locale, Locale.ShortFormat)
-                                color: "#aaa"
-                            }
-                        }
                     }
                 }
             }
@@ -241,14 +271,14 @@ ApplicationWindow {
                 id: menu
                 y: - menu.height
                 MenuItem {
-                    text: qsTr("添加活动事项...")
+                    text: qsTr("Add Event...")
                     onClicked: aapopup.open()
                 }
                 MenuItem {
-                    text: qsTr("设置")
+                    text: qsTr("Settings")
                 }
                 MenuItem {
-                    text: qsTr("关于")
+                    text: qsTr("About")
                     onClicked:aboutpopup.open()
                 }
 
@@ -265,7 +295,7 @@ ApplicationWindow {
 
                 MenuItem {
                     id:doexit
-                    text: qsTr("退出")
+                    text: qsTr("Exit")
                     onClicked: mainwindow.close()
                 }
             }
@@ -276,12 +306,12 @@ ApplicationWindow {
             id:aapopup
             modal: true
             focus: true
-            width: 375
+            width: 325
             x: (parent.width - width)/2
             y: (parent.height - height)/2
             contentItem: Column {
                 Label {
-                    text: "添加活动事项"
+                    text: "Add Event"
                     font.pointSize: 18
                     width: parent.width
                 }
@@ -289,11 +319,11 @@ ApplicationWindow {
                 TextField {
                     id: activityfield
                     width: parent.width
-                    placeholderText: qsTr("输入活动事项...")
+                    placeholderText: qsTr("Enter Event...")
                 }
 
                 Text{
-                    text:"开始时间："
+                    text:"Start Time:"
                 }
 
                 Row{
@@ -341,13 +371,13 @@ ApplicationWindow {
 
                     Tumbler {
                         id: starthoursTumbler
-                        model: 12
+                        model: 24
                         visibleItemCount: 3
                         height: 100
-                        currentIndex: new Date().toLocaleString(Qt.locale(),"HH") <= 12 ? new Date().toLocaleString(Qt.locale(),"HH") : new Date().toLocaleString(Qt.locale(),"HH") - 12
+                        currentIndex: new Date().toLocaleString(Qt.locale(),"HH")
 
                         delegate: Text{
-                            text:modelData + 1
+                            text:modelData
                             font:starthoursTumbler.font
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
@@ -400,36 +430,12 @@ ApplicationWindow {
                             color: Qt.platform.os === "osx" ? "#3778d0" : systemPalette.highlight
                         }
                     }
-
-                    Tumbler {
-                        id: startamPmTumbler
-                        model: ["AM", "PM"]
-                        visibleItemCount: 3
-                        height: 100
-                        currentIndex: new Date().toLocaleString(Qt.locale(),"HH") <= 12 ? 0 : 1
-
-                        Rectangle {
-                            anchors.horizontalCenter: startamPmTumbler.horizontalCenter
-                            y: startamPmTumbler.height * 0.35
-                            width: 35
-                            height: 2
-                            color: Qt.platform.os === "osx" ? "#3778d0" : systemPalette.highlight
-                        }
-
-                        Rectangle {
-                            anchors.horizontalCenter: startamPmTumbler.horizontalCenter
-                            y: startamPmTumbler.height * 0.65
-                            width: 35
-                            height: 2
-                            color: Qt.platform.os === "osx" ? "#3778d0" : systemPalette.highlight
-                        }
-                    }
                 }
 
 
 
                 Text{
-                    text:"结束时间："
+                    text:"End Time:"
                 }
 
                 Row{
@@ -477,13 +483,13 @@ ApplicationWindow {
 
                     Tumbler {
                         id: stophoursTumbler
-                        model: 12
+                        model: 24
                         visibleItemCount: 3
                         height: 100
-                        currentIndex: new Date().toLocaleString(Qt.locale(),"HH") <= 12 ? new Date().toLocaleString(Qt.locale(),"HH") : new Date().toLocaleString(Qt.locale(),"HH") - 12
+                        currentIndex: new Date().toLocaleString(Qt.locale(),"HH")
 
                         delegate: Text{
-                            text:modelData + 1
+                            text:modelData
                             font:stophoursTumbler.font
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
@@ -537,40 +543,17 @@ ApplicationWindow {
                         }
                     }
 
-                    Tumbler {
-                        id: stopamPmTumbler
-                        model: ["AM", "PM"]
-                        visibleItemCount: 3
-                        height: 100
-                        currentIndex: new Date().toLocaleString(Qt.locale(),"HH") <= 12 ? 0 : 1
-
-                        Rectangle {
-                            anchors.horizontalCenter: stopamPmTumbler.horizontalCenter
-                            y: stopamPmTumbler.height * 0.35
-                            width: 35
-                            height: 2
-                            color: Qt.platform.os === "osx" ? "#3778d0" : systemPalette.highlight
-                        }
-
-                        Rectangle {
-                            anchors.horizontalCenter: stopamPmTumbler.horizontalCenter
-                            y: stopamPmTumbler.height * 0.65
-                            width: 35
-                            height: 2
-                            color: Qt.platform.os === "osx" ? "#3778d0" : systemPalette.highlight
-                        }
-                    }
                 }
                 Row {
                     Button{
                         id: confirmaddactivity
-                        text: "添加"
+                        text: "Add"
                         flat: true
                     }
 
                     Button{
                         id: canceladdactivity
-                        text: "取消"
+                        text: "Drop"
                         flat: true
                         onClicked: aapopup.close()
                     }
@@ -596,14 +579,14 @@ ApplicationWindow {
 
                 Text {
                     width: parent.width
-                    text: qsTr("liCalendar,一款基于Qt5的日历软件。")
+                    text: qsTr("liCalendar, a lightweight and beautifully designed calendar app based on QtQuick Controls.")
                     wrapMode: Text.WordWrap
-                    font.pixelSize: 24
+                    font.pixelSize: 16
                     x:15
                 }
 
                 Button{
-                    text:"确定"
+                    text:"OK"
                     flat:true
                     onClicked: aboutpopup.close()
                 }
@@ -614,9 +597,9 @@ ApplicationWindow {
             target: confirmaddactivity
             property var locale: Qt.locale()
             property string startdatestr: startyearstf.text+"-"+startmonthstf.text+"-"+startdaystf.text
-            property string starttimestr: (starthoursTumbler.currentIndex + 12 * (startamPmTumbler.currentIndex == 0 ? 0:1) + 1) * 3600 + startminutesTumbler.currentIndex*60
+            property string starttimestr: starthoursTumbler.currentIndex  * 3600 + startminutesTumbler.currentIndex*60
             property string stopdatestr: stopyearstf.text+"-"+stopmonthstf.text+"-"+stopdaystf.text
-            property string stoptimestr: (stophoursTumbler.currentIndex + 12 * (stopamPmTumbler.currentIndex == 0 ? 0:1) + 1) * 3600 + stopminutesTumbler.currentIndex*60
+            property string stoptimestr: stophoursTumbler.currentIndex * 3600 + stopminutesTumbler.currentIndex*60
             onClicked:activityfield.text != "" ? eventModel.addEvents(activityfield.text
                                               ,startdatestr
                                               ,starttimestr
